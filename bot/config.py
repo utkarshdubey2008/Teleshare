@@ -38,26 +38,26 @@ class Config(BaseSettings):
     # Bot deploy config
     PORT: int = 8080
     HOSTNAME: str = "0.0.0.0"  # noqa: S104
-    HTTP_SERVER: bool = True
+    HTTP_SERVER: bool = False
 
-    API_ID: int = 25482744
-    API_HASH: str = "e032d6e5c05a5d0bfe691480541d64f4"
-    BOT_TOKEN: str = "7999015273:AAGjQtwxPbaOWofV9YYH2PZeGV730ck3h_w"
-    BOT_WORKER: int = 8
-    BOT_SESSION: str = "Zaws-File-Share"
-    BOT_MAX_MESSAGE_CACHE_SIZE: int = 100
+    API_ID: int
+    API_HASH: str
+    BOT_TOKEN: str
+    BOT_WORKER: int
+    BOT_SESSION: str
+    BOT_MAX_MESSAGE_CACHE_SIZE: int
 
-    MONGO_DB_URL: MongoSRVDsn = "mongodb+srv://emailbot:utkarsh2008@cluster0.08udh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    MONGO_DB_NAME: str = "Zaws-File-Share"
+    MONGO_DB_URL: MongoSRVDsn
+    MONGO_DB_NAME: str
 
     # Bot main config
     RATE_LIMITER: bool = True
-    BACKUP_CHANNEL: int = -1002485552269
-    ROOT_ADMINS_ID: list[int] = [2009509228, 7758708579]
-    PRIVATE_REQUEST: bool = False
-    PROTECT_CONTENT: bool = True
-    FORCE_SUB_CHANNELS: list[int] = [-1002209844539]
-    AUTO_GENERATE_LINK: bool = True
+    BACKUP_CHANNEL: int
+    ROOT_ADMINS_ID: list[int]
+    PRIVATE_REQUEST: bool
+    PROTECT_CONTENT: bool
+    FORCE_SUB_CHANNELS: list[int]
+    AUTO_GENERATE_LINK: bool
 
     # Injected Config
     channels_n_invite: dict[str, ChannelInfo] = {}
@@ -68,9 +68,10 @@ class Config(BaseSettings):
 
     @field_validator("ROOT_ADMINS_ID", "FORCE_SUB_CHANNELS", mode="before")
     @classmethod
-    def convert_int_to_list(cls, value: int | list[int]) -> list[int]:
-        if isinstance(value, int):
-            return [value]
+    def parse_comma_separated_ints(cls, value: str | list[int]) -> list[int]:
+        """Convert comma-separated string of IDs to a list of integers."""
+        if isinstance(value, str):
+            return [int(x.strip()) for x in value.split(",")]
         return value
 
     @field_validator("channels_n_invite", mode="before")
