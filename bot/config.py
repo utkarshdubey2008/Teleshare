@@ -3,7 +3,6 @@
 Config: Bot Config
 """
 
-# ruff: noqa: ARG003
 import logging
 import sys
 from pathlib import Path
@@ -37,7 +36,7 @@ class Config(BaseSettings):
 
     # Bot deploy config
     PORT: int = 8080
-    HOSTNAME: str = "0.0.0.0"  # noqa: S104
+    HOSTNAME: str = "0.0.0.0"
     HTTP_SERVER: bool = False
 
     API_ID: int
@@ -68,10 +67,13 @@ class Config(BaseSettings):
 
     @field_validator("ROOT_ADMINS_ID", "FORCE_SUB_CHANNELS", mode="before")
     @classmethod
-    def parse_comma_separated_ints(cls, value: str | list[int]) -> list[int]:
-        """Convert comma-separated string of IDs to a list of integers."""
+    def parse_list(cls, value: str | list[int]) -> list[int]:
+        """Convert a comma-separated string to a list of integers."""
         if isinstance(value, str):
-            return [int(x.strip()) for x in value.split(",")]
+            try:
+                return [int(x.strip()) for x in value.split(",") if x.strip().isdigit()]
+            except ValueError:
+                raise ValueError(f"Invalid format for list[int]: {value}")
         return value
 
     @field_validator("channels_n_invite", mode="before")
@@ -95,7 +97,7 @@ class Config(BaseSettings):
 
 
 try:
-    config = Config()  # type: ignore[reportCallIssue]
+    config = Config()
 except (ValidationError, SettingsError):
     logging.exception("Configuration Error")
     sys.exit(1)
