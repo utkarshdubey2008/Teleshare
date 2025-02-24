@@ -68,13 +68,21 @@ class Config(BaseSettings):
     @field_validator("ROOT_ADMINS_ID", "FORCE_SUB_CHANNELS", mode="before")
     @classmethod
     def parse_list(cls, value: str | list[int]) -> list[int]:
-        """Convert a comma-separated string to a list of integers."""
+        """Convert a single int, a comma-separated string, or a list into a list of ints."""
         if isinstance(value, str):
+            value = value.strip()
+            if not value:  # Handle empty values
+                return []
             try:
                 return [int(x.strip()) for x in value.split(",") if x.strip().isdigit()]
             except ValueError:
                 raise ValueError(f"Invalid format for list[int]: {value}")
-        return value
+        elif isinstance(value, int):  # Handle a single integer
+            return [value]
+        elif isinstance(value, list):
+            return value
+        else:
+            raise TypeError(f"Expected str, int, or list[int], got {type(value)}: {value}")
 
     @field_validator("channels_n_invite", mode="before")
     @classmethod
